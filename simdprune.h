@@ -131,6 +131,22 @@ static inline __m256i pext_prune256_epi32(__m256i src, unsigned int mask) {
   return _mm256_permutevar8x32_epi32(src,shufmask);
 }
 
+__m128i pext_prune128_epi8(__m128i src, uint64_t mask) {
+  // duplicate each bit into a nibble of the same value
+  uint64_t expanded_mask = _pdep_u64(mask, 0x1111111111111111) * 0xF;
+
+  // Simulate a 16-wide compaction via `pext`, producing up to 16 nibbles
+  uint64_t wanted_indices = _pext_u64(0xFEDCBA9876543210, expanded_mask);
+
+  // Move to a vector
+  __m128i nibble_vec = _mm_cvtsi64_si128(wanted_indices);
+
+  // Spread each nibble to a byte
+  __m128i byte_vec = _mm_and_si128(_mm_unpacklo_epi8(nibble_vec, _mm_srli_epi16(nibble_vec, 4)), _mm_set1_epi32(0x0F0F0F0F));
+
+  return _mm_shuffle_epi8(src, byte_vec);
+}
+
 #endif //  __AVX2__
 
 #endif

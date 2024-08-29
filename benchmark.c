@@ -167,9 +167,6 @@ __m128i runskinnyprune_epi8(int * bitmasks, int N, __m128i *x) {
   return *x;
 }
 
-
-#ifdef __AVX512VBMI2__ 
-
 __attribute__ ((noinline))
 __m128i runbmiprune_epi8(int * bitmasks, int N, __m128i *x) {
   for (int k = 0; k < N; k++) {
